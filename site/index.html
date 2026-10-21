@@ -39,6 +39,17 @@
         onLoadError: (e) => fail("onLoadError: " + (e && e.message || e)),
       });
       new ResizeObserver(() => r.resizeDrawingSurfaceToCanvas()).observe(canvas);
+
+      // Don't render while the canvas is off-screen or the tab is hidden.
+      let onScreen = true;
+      const sync = () => {
+        if (onScreen && !document.hidden) r.play(); else r.pause();
+      };
+      new IntersectionObserver((entries) => {
+        onScreen = entries[entries.length - 1].isIntersecting;
+        sync();
+      }).observe(canvas);
+      document.addEventListener("visibilitychange", sync);
     }).catch((e) => fail("Could not load .riv: " + (e && e.message || e)));
   </script>
 </body>
