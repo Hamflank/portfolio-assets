@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Skater</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #1d1d1d; }
+    canvas { display: block; width: 100%; height: 100%; outline: none; cursor: pointer; }
+    #msg { position: fixed; left: 12px; bottom: 12px; color: #f4f4f4; font: 13px sans-serif; opacity: .8; }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div id="msg">Loading…</div>
+  <script src="https://cdn.jsdelivr.net/npm/@rive-app/webgl2@2.45.0/rive.js"></script>
+  <script>
+    const msg = document.getElementById("msg");
+    const canvas = document.getElementById("c");
+    const params = new URLSearchParams(location.search);
+    const src = params.get("src") || "skater.riv";
+    const fail = (m) => { msg.textContent = m; console.error(m); };
+
+    const file = new rive.RiveFile({ src, enableGPUCanvas: true });
+    file.init().then(() => {
+      const artboard = file.getInstance().defaultArtboard();
+      const sm = artboard && artboard.stateMachineCount() ? artboard.stateMachineByIndex(0).name : undefined;
+      if (artboard) artboard.delete();
+      const r = new rive.Rive({
+        riveFile: file,
+        canvas,
+        autoplay: true,
+        autoBind: true,
+        enableGPUCanvas: true,
+        enableMultiTouch: true,
+        stateMachines: sm,
+        layout: new rive.Layout({ fit: "contain", alignment: "center" }),
+        onLoad: () => { msg.textContent = ""; r.resizeDrawingSurfaceToCanvas(); },
+        onLoadError: (e) => fail("onLoadError: " + (e && e.message || e)),
+      });
+      new ResizeObserver(() => r.resizeDrawingSurfaceToCanvas()).observe(canvas);
+
+      // Don't render while the canvas is off-screen or the tab is hidden.
+      let onScreen = true;
+      const sync = () => {
+        if (onScreen && !document.hidden) r.play(); else r.pause();
+      };
+      new IntersectionObserver((entries) => {
+        onScreen = entries[entries.length - 1].isIntersecting;
+        sync();
+      }).observe(canvas);
+      document.addEventListener("visibilitychange", sync);
+
+    }).catch((e) => fail("Could not load .riv: " + (e && e.message || e)));
+  </script>
+</body>
+</html>
