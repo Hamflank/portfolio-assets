@@ -6,7 +6,7 @@
   <title>Skater</title>
   <style>
     html, body { margin: 0; height: 100%; background: #1d1d1d; }
-    canvas { display: block; width: 100%; height: 100%; outline: none; }
+    canvas { display: block; width: 100%; height: 100%; outline: none; cursor: pointer; }
     #msg { position: fixed; left: 12px; bottom: 12px; color: #f4f4f4; font: 13px sans-serif; opacity: .8; }
   </style>
 </head>
@@ -50,6 +50,14 @@
         sync();
       }).observe(canvas);
       document.addEventListener("visibilitychange", sync);
+
+      // Clicks inside an iframe never reach the Framer layer behind it, so
+      // the page does the navigation itself.
+      const HREF = "https://mischadewilt.com/skater";
+      canvas.addEventListener("click", () => {
+        try { window.top.location.href = HREF; }
+        catch (e) { window.open(HREF, "_blank", "noopener"); }
+      });
     }).catch((e) => fail("Could not load .riv: " + (e && e.message || e)));
   </script>
 </body>
