@@ -23,7 +23,13 @@
 
     const file = new rive.RiveFile({ src, enableGPUCanvas: true });
     file.init().then(() => {
-      const artboard = file.getInstance().defaultArtboard();
+      // Pick the artboard by name; fall back to the default one if it isn't in the file.
+      const ARTBOARD = params.get("artboard") || "Skater v1 (Rim Light) - Pushing";
+      const inst = file.getInstance();
+      let artboard = null;
+      try { artboard = inst.artboardByName(ARTBOARD); } catch (e) {}
+      const abName = artboard ? ARTBOARD : undefined;
+      if (!artboard) { console.warn("Artboard not found, using default:", ARTBOARD); artboard = inst.defaultArtboard(); }
       const sm = artboard && artboard.stateMachineCount() ? artboard.stateMachineByIndex(0).name : undefined;
       if (artboard) artboard.delete();
       const r = new rive.Rive({
@@ -33,6 +39,7 @@
         autoBind: true,
         enableGPUCanvas: true,
         enableMultiTouch: true,
+        artboard: abName,
         stateMachines: sm,
         layout: new rive.Layout({ fit: "contain", alignment: "center" }),
         onLoad: () => { msg.textContent = ""; r.resizeDrawingSurfaceToCanvas(); },
