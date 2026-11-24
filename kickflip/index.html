@@ -6,7 +6,7 @@
   <title>Skater</title>
   <style>
     html, body { margin: 0; height: 100%; background: #1d1d1d; }
-    canvas { display: block; width: 100%; height: 100%; outline: none; cursor: pointer; }
+    canvas { display: block; width: 100%; height: 100%; outline: none; cursor: pointer; touch-action: pan-y; }
     #msg { position: fixed; left: 12px; bottom: 12px; color: #f4f4f4; font: 13px sans-serif; opacity: .8; }
   </style>
 </head>
@@ -39,6 +39,8 @@
         autoBind: true,
         enableGPUCanvas: true,
         enableMultiTouch: true,
+        // Let vertical swipes on the canvas scroll the page (mobile).
+        isTouchScrollEnabled: true,
         artboard: abName,
         stateMachines: sm,
         layout: new rive.Layout({ fit: "contain", alignment: "center" }),
